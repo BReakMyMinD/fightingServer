@@ -11,9 +11,9 @@ public:
 
 	
 
-	friend QDataStream& operator<<(QDataStream& stream, const Character& character) { 
+	friend QDataStream& operator<<(QDataStream& stream, const Character* character) { 
 		//сериализовывать только данные, необходимые для отрисовки
-		return stream << character.x << character.y << character.hp;
+		return stream << character->x << character->y << character->hp;
 	}
 	
 
