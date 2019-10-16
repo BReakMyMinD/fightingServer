@@ -29,9 +29,11 @@ void Server::incomingConnection() {
 }
 
 void Server::sendGameState(QTcpSocket *playerOne, QTcpSocket *playerTwo) {
-	
-	//writeData<QPair<Character, Character>>(playerOne, GAME_UPDATE, gameData);
-	//writeData<QPair<Character, Character>>(playerTwo, GAME_UPDATE, gameData);
+	QPair<Character*, Character*> gameData;
+	gameData.first = _players[playerOne]->_lobby->playerOneCharacter;
+	gameData.first = _players[playerOne]->_lobby->playerOneCharacter;
+	writeData<QPair<Character*, Character*>>(playerOne, GAME_UPDATE, gameData);
+	writeData<QPair<Character*, Character*>>(playerTwo, GAME_UPDATE, gameData);
 }
 
 void Server::socketDisconnected() {//баг пофиксить:
