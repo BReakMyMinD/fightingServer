@@ -34,7 +34,7 @@ void Player::setLobby(Lobby * lobbyPtr) {
 	playerStatus = IS_PLAYING;
 }
 
-void Player::moveLeft() {
+/*void Player::moveLeft() {
 	if (this->lobby->_playerOneSocket->socketDescriptor() == id) {
 		this->lobby->playerOneCharacter
 	}
@@ -46,4 +46,4 @@ void Player::moveRight() {
 
 void Player::jump() {
 
-}
+}*/

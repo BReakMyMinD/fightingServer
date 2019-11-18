@@ -117,6 +117,7 @@ void Server::readData() {//обработка любых входящих данных
 		case KEY_PRESS: {
 			int keyCode;
 			in >> keyCode;
+			qDebug() << _players[clientSocket]->name << " pressed " << keyCode;
 			switch (keyCode) {
 			case(Qt::Key_A): {
 				//emit _players[clientSocket]->moveLeft();

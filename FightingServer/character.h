@@ -7,7 +7,7 @@ class Character : public QObject{
 	Q_OBJECT
 public:
 	Character() {};
-	Character(bool isLeftPosition, int descriptor);
+	Character(bool isLeftPosition);
 
 	//void interact(Character& opponentCharacter);
 
@@ -15,7 +15,7 @@ public:
 		//сериализовывать только данные, необходимые для отрисовки
 		return stream << character->x << character->y << character->hp;
 	}
-	const int id;
+	
 
 public slots:
 	void moveRight();
