@@ -1,7 +1,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QDataStream>
-#include <QMap>
+#include <QHash>
 #include <QVector>
 #include <QStringList>
 #include <QObject>
@@ -26,7 +26,7 @@ private slots:
 private:
 	QDataStream in;
 	QTcpServer* _tcpServer;
-	QMap<QTcpSocket*, Player*> _players;
+	QHash<QTcpSocket*, Player*> _players;
 	template<class T>
 	void writeData(QTcpSocket* client, qint8 num, T data);
 };

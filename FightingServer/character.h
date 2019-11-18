@@ -7,15 +7,15 @@ class Character : public QObject{
 	Q_OBJECT
 public:
 	Character() {};
-	Character(bool isLeftPosition);
+	Character(bool isLeftPosition, int descriptor);
 
-	
+	//void interact(Character& opponentCharacter);
 
 	friend QDataStream& operator<<(QDataStream& stream, const Character* character) { 
 		//сериализовывать только данные, необходимые для отрисовки
 		return stream << character->x << character->y << character->hp;
 	}
-	
+	const int id;
 
 public slots:
 	void moveRight();

@@ -30,23 +30,28 @@ void Server::incomingConnection() {
 
 void Server::sendGameState(QTcpSocket *playerOne, QTcpSocket *playerTwo) {
 	QPair<Character*, Character*> gameData;
-	gameData.first = _players[playerOne]->_lobby->playerOneCharacter;
-	gameData.first = _players[playerOne]->_lobby->playerOneCharacter;
+	gameData.first = _players[playerOne]->lobby->playerOneCharacter;
+	gameData.second = _players[playerOne]->lobby->playerTwoCharacter;
 	writeData<QPair<Character*, Character*>>(playerOne, GAME_UPDATE, gameData);
 	writeData<QPair<Character*, Character*>>(playerTwo, GAME_UPDATE, gameData);
 }
 
-void Server::socketDisconnected() {//баг пофиксить:
-	//если сокет отключился во время игры, то класс Lobby по таймеру продолжает писать в удаленный сокет -> сервер крашится
+void Server::socketDisconnected() {
 	QTcpSocket* disconnectedSocket = (QTcpSocket*)sender();
-	
+	if (_players[disconnectedSocket]->lobby != nullptr) {
+		QTcpSocket* remainingSocket = _players[disconnectedSocket]->lobby->remainingSocket(disconnectedSocket);
+		writeData<QString>(remainingSocket, PLAYER_LEFT, _players[disconnectedSocket]->name);
+		_players[remainingSocket]->playerStatus = NO_INFO;
+		_players[disconnectedSocket]->lobby->deleteLater();
+		_players[disconnectedSocket]->lobby = nullptr;
+	}
 	_players.remove(disconnectedSocket);
 	disconnectedSocket->deleteLater();
 }
 
 void Server::readData() {//обработка любых входящих данных
 	QTcpSocket* clientSocket = (QTcpSocket*)sender();
-	int descriptor = clientSocket->socketDescriptor();
+	//int descriptor = clientSocket->socketDescriptor();
 
 	in.setDevice(clientSocket);
 	in.setVersion(QDataStream::Qt_5_9);
@@ -72,11 +77,11 @@ void Server::readData() {//обработка любых входящих данных
 		case GET_LOBBY_LIST: {
 			QString name;
 			in >> name;
-			qDebug() << "player " << name << " connected to lobby";
+			qDebug() << "player " << name << " is searching lobby";
 			_players[clientSocket]->name = name;
 			_players[clientSocket]->playerStatus = LOBBY_GUEST;
 			QStringList list;
-			QMap<QTcpSocket*, Player*>::iterator i;
+			QHash<QTcpSocket*, Player*>::iterator i;
 			for (i = _players.begin(); i != _players.end(); ++i) {
 				if (i.value()->playerStatus == LOBBY_OWNER) {
 					list.append(i.value()->name + "#" + QString::number(i.key()->socketDescriptor()));
@@ -88,7 +93,7 @@ void Server::readData() {//обработка любых входящих данных
 		case JOIN_LOBBY: {
 			int lobbyDescriptor;
 			in >> lobbyDescriptor;
-			QMap<QTcpSocket*, Player*>::iterator i;
+			QHash<QTcpSocket*, Player*>::iterator i;
 			for (i = _players.begin(); i != _players.end(); ++i) {
 				if (i.value()->playerStatus == LOBBY_OWNER && i.key()->socketDescriptor() == lobbyDescriptor) {
 					Lobby* newLobby = new Lobby(clientSocket, i.key());
@@ -98,12 +103,12 @@ void Server::readData() {//обработка любых входящих данных
 					writeData<int>(i.key(), LOBBY_JOINED, 0);
 					connect(newLobby, &Lobby::gameUpdated, this, &Server::sendGameState);
 					//коннекты пользовательских действий к слоту персонажа
-					connect(_players[clientSocket], &Player::moveLeft, newLobby->playerOneCharacter, &Character::moveLeft);
+					/*connect(_players[clientSocket], &Player::moveLeft, newLobby->playerOneCharacter, &Character::moveLeft);
 					connect(_players[clientSocket], &Player::moveRight, newLobby->playerOneCharacter, &Character::moveRight);
 					connect(_players[clientSocket], &Player::jump, newLobby->playerOneCharacter, &Character::jump);
 					connect(_players[i.key()], &Player::moveLeft, newLobby->playerTwoCharacter, &Character::moveLeft);
 					connect(_players[i.key()], &Player::moveRight, newLobby->playerTwoCharacter, &Character::moveRight);
-					connect(_players[i.key()], &Player::jump, newLobby->playerTwoCharacter, &Character::jump);
+					connect(_players[i.key()], &Player::jump, newLobby->playerTwoCharacter, &Character::jump);*/
 					break;
 				}
 			}
@@ -114,15 +119,15 @@ void Server::readData() {//обработка любых входящих данных
 			in >> keyCode;
 			switch (keyCode) {
 			case(Qt::Key_A): {
-				emit _players[clientSocket]->moveLeft();
+				//emit _players[clientSocket]->moveLeft();
 				break;
 			}
 			case(Qt::Key_D): {
-				emit _players[clientSocket]->moveRight();
+				//emit _players[clientSocket]->moveRight();
 				break;
 			}
 			case(Qt::Key_W): {
-				emit _players[clientSocket]->jump();
+				//emit _players[clientSocket]->jump();
 				break;
 			}
 			}

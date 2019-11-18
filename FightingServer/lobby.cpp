@@ -18,7 +18,32 @@ void Lobby::timerUpdate() {
 	emit gameUpdated(_playerOneSocket, _playerTwoSocket);
 }
 
-void Player::setLobby(Lobby * lobby) {
-	_lobby = lobby;
+QTcpSocket* Lobby::remainingSocket(QTcpSocket* disconnectedSocket) {
+	_gameTimer->stop();
+	_gameTimer->deleteLater();
+	if (disconnectedSocket == _playerOneSocket) {
+		return _playerTwoSocket;
+	}
+	if (disconnectedSocket == _playerTwoSocket) {
+		return _playerOneSocket;
+	}
+}
+
+void Player::setLobby(Lobby * lobbyPtr) {
+	lobby = lobbyPtr;
 	playerStatus = IS_PLAYING;
+}
+
+void Player::moveLeft() {
+	if (this->lobby->_playerOneSocket->socketDescriptor() == id) {
+		this->lobby->playerOneCharacter
+	}
+}
+
+void Player::moveRight() {
+
+}
+
+void Player::jump() {
+
 }
