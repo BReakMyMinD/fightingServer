@@ -14,13 +14,13 @@ Character::Character(bool isLeftPosition) {
 };
 
 void Character::moveLeft() {
-	vx = -10;
+	x -= 10;
 }
 
 void Character::moveRight() {
-	vx = 10;
+	x += 10;
 }
 
 void Character::jump() {
-	vy = 10;
+	y += 10;
 }

@@ -63,6 +63,8 @@ artifacts/
 *.tmp_proj
 *.log
 *.vspscc
+*.vcxproj
+*.filters
 *.vssscc
 .builds
 *.pidb

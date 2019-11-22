@@ -43,6 +43,20 @@ void Player::readData() {
 		int key;
 		in >> key;
 		qDebug() << name << " pressed " << key;
+		switch (key) {
+		case(Qt::Key_A): {
+			getCharacter()->moveLeft();
+			break;
+		}
+		case(Qt::Key_D): {
+			getCharacter()->moveRight();
+			break;
+		}
+		case(Qt::Key_W): {
+			getCharacter()->jump();
+			break;
+		}
+		}
 
 		break;
 	}
