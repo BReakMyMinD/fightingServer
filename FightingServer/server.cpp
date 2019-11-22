@@ -21,23 +21,47 @@ void Server::incomingConnection() {
 		QTcpSocket* clientSocket = _tcpServer->nextPendingConnection();
 		int descriptor = clientSocket->socketDescriptor();
 		qDebug() << descriptor << " connected";
-		Player* playerObject = new Player();
-		_players[clientSocket] = playerObject;
-		connect(clientSocket, &QTcpSocket::readyRead, this, &Server::readData); 
-		connect(clientSocket, &QTcpSocket::disconnected, this, &Server::socketDisconnected);
+		Player* playerObj = new Player(clientSocket);
+		_players.append(playerObj);
+		connect(playerObj, &Player::getLobbyList, this, &Server::getLobbyList);
+		connect(playerObj, &Player::joinLobby, this, &Server::joinLobby);
+		connect(playerObj, &Player::leave, this, &Server::socketDisconnected);
 	}
 }
 
-void Server::sendGameState(QTcpSocket *playerOne, QTcpSocket *playerTwo) {
+void Server::getLobbyList() {
+	Player* player = (Player*)sender();
+	QStringList list;
+	for (auto item : _players) {
+		if (item->status == OWNER_WAITING) {
+			list.append(item->name + "#" + QString::number(item->descriptor));
+		}
+	}
+	player->lobbyListGot(list);
+}
+
+void Server::joinLobby(int descriptor) {
+	Player* player = (Player*)sender();
+	for (auto item : _players) {
+		if (item->status == OWNER_WAITING && item->descriptor == descriptor) {
+			Lobby* lobbyObj = new Lobby();
+			player->setLobby(lobbyObj);
+			item->setLobby(lobbyObj);
+			connect(lobbyObj, &Lobby::gameUpdated, player, &Player::sendGameState);
+			connect(lobbyObj, &Lobby::gameUpdated, item, &Player::sendGameState);
+		}
+	}
+}
+/*void Server::sendGameState(QTcpSocket *playerOne, QTcpSocket *playerTwo) {
 	QPair<Character*, Character*> gameData;
 	gameData.first = _players[playerOne]->lobby->playerOneCharacter;
 	gameData.second = _players[playerOne]->lobby->playerTwoCharacter;
 	writeData<QPair<Character*, Character*>>(playerOne, GAME_UPDATE, gameData);
 	writeData<QPair<Character*, Character*>>(playerTwo, GAME_UPDATE, gameData);
-}
+}*/
 
 void Server::socketDisconnected() {
-	QTcpSocket* disconnectedSocket = (QTcpSocket*)sender();
+	/*QTcpSocket* disconnectedSocket = (QTcpSocket*)sender();
 	if (_players[disconnectedSocket]->lobby != nullptr) {
 		QTcpSocket* remainingSocket = _players[disconnectedSocket]->lobby->remainingSocket(disconnectedSocket);
 		writeData<QString>(remainingSocket, PLAYER_LEFT, _players[disconnectedSocket]->name);
@@ -46,10 +70,10 @@ void Server::socketDisconnected() {
 		_players[disconnectedSocket]->lobby = nullptr;
 	}
 	_players.remove(disconnectedSocket);
-	disconnectedSocket->deleteLater();
+	disconnectedSocket->deleteLater();*/
 }
 
-void Server::readData() {//обработка любых входящих данных
+/*void Server::readData() {//обработка любых входящих данных
 	QTcpSocket* clientSocket = (QTcpSocket*)sender();
 	//int descriptor = clientSocket->socketDescriptor();
 
@@ -108,7 +132,7 @@ void Server::readData() {//обработка любых входящих данных
 					connect(_players[clientSocket], &Player::jump, newLobby->playerOneCharacter, &Character::jump);
 					connect(_players[i.key()], &Player::moveLeft, newLobby->playerTwoCharacter, &Character::moveLeft);
 					connect(_players[i.key()], &Player::moveRight, newLobby->playerTwoCharacter, &Character::moveRight);
-					connect(_players[i.key()], &Player::jump, newLobby->playerTwoCharacter, &Character::jump);*/
+					connect(_players[i.key()], &Player::jump, newLobby->playerTwoCharacter, &Character::jump);
 					break;
 				}
 			}
@@ -152,4 +176,4 @@ void Server::writeData(QTcpSocket* client, qint8 code, T data) { //T - только се
 	out.setVersion(QDataStream::Qt_5_9);
 	out << code << data;
 	client->write(block);
-}
+}*/

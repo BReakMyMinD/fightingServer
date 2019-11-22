@@ -7,8 +7,8 @@
 #include <QObject>
 #include <QString>
 #include <QPair>
-#include "types.h"
-#include "lobby.h"
+#include <QTimer>
+#include "player.h"
 #include "character.h"
 
 class Server : public QObject {
@@ -16,17 +16,17 @@ class Server : public QObject {
 public:
 	void startServer(int port);
 
+public slots:
+	void joinLobby(int descriptor);
+	void getLobbyList();
 
 private slots:
-	void readData();
 	void incomingConnection();
-	void sendGameState(QTcpSocket *playerOne, QTcpSocket *playerTwo);//отправляет клиентам обновленную информацию о игровой сессии
 	void socketDisconnected();
+	
 
 private:
-	QDataStream in;
+	
 	QTcpServer* _tcpServer;
-	QHash<QTcpSocket*, Player*> _players;
-	template<class T>
-	void writeData(QTcpSocket* client, qint8 num, T data);
+	QVector<Player*> _players;
 };

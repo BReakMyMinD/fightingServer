@@ -54,12 +54,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_character.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="server.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="lobby.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="player.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
