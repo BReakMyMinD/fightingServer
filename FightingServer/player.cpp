@@ -42,7 +42,7 @@ void Player::readData() {
 	case KEY_PRESS: {
 		int key;
 		in >> key;
-		qDebug() << name << " pressed " << key;
+		//qDebug() << name << " pressed " << key;
 		switch (key) {
 		case(Qt::Key_A): {
 			getCharacter()->moveLeft();
