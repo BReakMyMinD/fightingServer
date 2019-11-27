@@ -22,5 +22,5 @@ void Character::moveRight() {
 }
 
 void Character::jump() {
-	y += 10;
+	y -= 10;
 }

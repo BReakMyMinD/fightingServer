@@ -10,12 +10,12 @@ Player::Player(QTcpSocket* socket) {
 }
 
 void Player::readData() {
-	in.startTransaction();
+	//in.startTransaction();
 	qint8 code;
 	in >> code;
-	if (!in.commitTransaction()) {
-		return;
-	}
+	//if (!in.commitTransaction()) {
+		//return;
+	//}
 	switch (code) {
 	case CREATE_LOBBY: {
 		QString name;
