@@ -7,11 +7,11 @@
 void Server::startServer(int port) {
 	_socket = new QUdpSocket(this);
 	_socket->bind(QHostAddress::LocalHost, 1025);
-	qDebug() << "Listening to port " << port;
 	connect(_socket, &QUdpSocket::readyRead, this, &Server::incomingConnection);
 }
 
 void Server::incomingConnection() {
+	qDebug() << "connection on port 1025";
 	while (_socket->hasPendingDatagrams()) {
 		QNetworkDatagram datagram = _socket->receiveDatagram();
 		int i = 1026;
@@ -22,6 +22,7 @@ void Server::incomingConnection() {
 			else {
 				Player* playerObj = new Player(datagram.senderAddress(), i);
 				_players[i] = playerObj;
+				qDebug() << i + " port set";
 				playerObj->setPort(i);
 				connect(playerObj, &Player::getLobbyList, this, &Server::getLobbyList);
 				connect(playerObj, &Player::joinLobby, this, &Server::joinLobby);

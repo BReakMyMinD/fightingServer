@@ -17,6 +17,7 @@ void Player::setPort(int port) {
 }
 
 void Player::readData() {
+	qDebug() << "new data on port " << _port;
 	while (_socket->hasPendingDatagrams()) {
 		QNetworkDatagram datagram = _socket->receiveDatagram();
 		in << datagram.data();
