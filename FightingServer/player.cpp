@@ -17,7 +17,11 @@ void Player::setPort(int port) {
 }
 
 void Player::readData() {
-	
+	while (_socket->hasPendingDatagrams()) {
+		QNetworkDatagram datagram = _socket->receiveDatagram();
+		in << datagram.data();
+	}
+
 	in.startTransaction();
 	qint8 code;
 	in >> code;

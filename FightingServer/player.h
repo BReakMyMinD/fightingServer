@@ -2,6 +2,7 @@
 #include "lobby.h"
 #include "types.h"
 #include <QHostAddress>
+#include <QNetworkDatagram>
 #include <QUdpSocket>
 
 enum Status {
