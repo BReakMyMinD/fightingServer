@@ -6,7 +6,7 @@
 
 void Server::startServer(int port) {
 	_socket = new QUdpSocket(this);
-	_socket->bind(QHostAddress::LocalHost, 1025);
+	_socket->bind(1025);
 	connect(_socket, &QUdpSocket::readyRead, this, &Server::incomingConnection);
 }
 
