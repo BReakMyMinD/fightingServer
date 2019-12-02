@@ -6,7 +6,8 @@
 
 void Server::startServer(int port) {
 	_socket = new QUdpSocket(this);
-	_socket->bind(QHostAddress::Any, 1025);
+	_socket->bind(QHostAddress::Any, 1234);
+	qDebug() << _socket->isOpen();
 	connect(_socket, &QUdpSocket::readyRead, this, &Server::incomingConnection);
 }
 
@@ -14,7 +15,7 @@ void Server::incomingConnection() {
 	qDebug() << "connection on port 1025";
 	while (_socket->hasPendingDatagrams()) {
 		QNetworkDatagram datagram = _socket->receiveDatagram();
-		int i = 1026;
+		int i = 1235;
 		while(i < 49150){
 			if (_players.contains(i)) {
 				i++;
