@@ -1,15 +1,23 @@
 #include "player.h"
 
-Player::Player(QTcpSocket* socket) {
-	_socket = socket;
-	connect(_socket, &QTcpSocket::readyRead, this, &Player::readData);
-	connect(_socket, &QTcpSocket::disconnected, this, &Player::disconnect);
+Player::Player(QHostAddress ip, int port) {
+	_socket = new QUdpSocket(this);
+	_socket->bind(QHostAddress::LocalHost, port);
+	_ip = ip;
+	connect(_socket, &QUdpSocket::readyRead, this, &Player::readData);
+	connect(_socket, &QUdpSocket::disconnected, this, &Player::disconnect);
 	this->descriptor = _socket->socketDescriptor();
 	in.setDevice(_socket);
 	in.setVersion(QDataStream::Qt_5_9);
 }
 
+void Player::setPort(int port) {
+	writeData<int>(NEW_PORT, port);
+	_socket->bind(QHostAddress::LocalHost, port);
+}
+
 void Player::readData() {
+	
 	in.startTransaction();
 	qint8 code;
 	in >> code;

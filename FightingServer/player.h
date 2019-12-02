@@ -1,6 +1,8 @@
 #include <QObject>
 #include "lobby.h"
 #include "types.h"
+#include <QHostAddress>
+#include <QUdpSocket>
 
 enum Status {
 	NO_INFO,
@@ -13,12 +15,13 @@ enum Status {
 class Player : public QObject {
 	Q_OBJECT
 public:
-	Player(QTcpSocket* socket);
+	Player(QHostAddress ip, int port);
 
 	Lobby* lobby = nullptr;
 	QString name;
 	Status status = NO_INFO;
 	void setLobby(Lobby* lobby);
+	void setPort(int port);
 	Character* getCharacter();
 	Character* getOpponentCharacter();
 
@@ -42,7 +45,9 @@ private:
 	template<class T>
 	void writeData(qint8 code, T data);
 
-	QTcpSocket* _socket;
+	QUdpSocket* _socket;
 	QDataStream in;
+	QHostAddress _ip;
+	int _port;
 
 };

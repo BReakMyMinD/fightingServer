@@ -5,6 +5,7 @@ const qint8 CREATE_LOBBY = 100;
 const qint8 LOBBY_CREATED = 200;
 const qint8 GET_LOBBY_LIST = 101;
 const qint8 LOBBY_LIST_GOT = 201;
+const qint8 NEW_PORT = 203;
 const qint8 JOIN_LOBBY = 102;
 const qint8 LOBBY_JOINED = 202;
 const qint8 GAME_UPDATE = 210;

@@ -5,28 +5,34 @@
 
 
 void Server::startServer(int port) {
-	_tcpServer = new QTcpServer(this);
-	if (!_tcpServer->listen(QHostAddress::Any, port)) {
-		qDebug() << "Could not start server";
-	}
-	else {
-		qDebug() << "Listening to port " << port;
-		connect(_tcpServer, &QTcpServer::newConnection, this, &Server::incomingConnection);
-		
-	}
+	_socket = new QUdpSocket(this);
+	_socket->bind(QHostAddress::LocalHost, 1025);
+	qDebug() << "Listening to port " << port;
+	connect(_socket, &QUdpSocket::readyRead, this, &Server::incomingConnection);
 }
 
 void Server::incomingConnection() {
-	while (_tcpServer->hasPendingConnections()) {
-		QTcpSocket* clientSocket = _tcpServer->nextPendingConnection();
-		int descriptor = clientSocket->socketDescriptor();
-		qDebug() << descriptor << " connected";
-		Player* playerObj = new Player(clientSocket);
-		_players.append(playerObj);
-		connect(playerObj, &Player::getLobbyList, this, &Server::getLobbyList);
-		connect(playerObj, &Player::joinLobby, this, &Server::joinLobby);
-		connect(playerObj, &Player::leave, this, &Server::socketDisconnected);
+	while (_socket->hasPendingDatagrams()) {
+		QNetworkDatagram datagram = _socket->receiveDatagram();
+		int i = 1026;
+		while(i < 49150){
+			if (_players.contains(i)) {
+				i++;
+			}
+			else {
+				Player* playerObj = new Player(datagram.senderAddress(), i);
+				_players[i] = playerObj;
+				playerObj->setPort(i);
+				connect(playerObj, &Player::getLobbyList, this, &Server::getLobbyList);
+				connect(playerObj, &Player::joinLobby, this, &Server::joinLobby);
+				connect(playerObj, &Player::leave, this, &Server::socketDisconnected);
+				break;
+			}
+		}
 	}
+	
+		
+	
 }
 
 void Server::getLobbyList() {
