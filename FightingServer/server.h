@@ -29,4 +29,5 @@ private:
 	
 	QTcpServer* _tcpServer;
 	QVector<Player*> _players;
+	QList<int> occupiedUdpPorts;
 };

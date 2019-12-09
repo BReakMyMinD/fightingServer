@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QDataStream>
 
+
+
 class Character : public QObject{
 	Q_OBJECT
 public:
@@ -10,10 +12,14 @@ public:
 	Character(bool isLeftPosition);
 
 	//void interact(Character& opponentCharacter);
-
-	friend QDataStream& operator<<(QDataStream& stream, const Character* character) { 
-		//сериализовывать только данные, необходимые для отрисовки
-		return stream << character->x << character->y << character->hp;
+	struct charData {
+		qint16 x, y;
+		qint8 hp;
+	} data;
+	
+	friend QDataStream& operator << (QDataStream& stream, const charData& item) {
+		stream << item.x << item.y << item.hp;
+		return stream;
 	}
 	
 
@@ -23,10 +29,11 @@ public slots:
 	void jump();
 
 private:
-	qint8 x,
+	
+	/*qint8 x,
 		vx,//гориз. ускорение
 		y,
 		vy,//верт. ускорение
 		hp,
-		width, heigth;//размеры хитбокса
+		width, heigth;//размеры хитбокса*/
 };

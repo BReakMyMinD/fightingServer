@@ -19,7 +19,7 @@ void Server::startServer(int port) {
 void Server::incomingConnection() {
 	while (_tcpServer->hasPendingConnections()) {
 		QTcpSocket* clientSocket = _tcpServer->nextPendingConnection();
-		int descriptor = clientSocket->socketDescriptor();
+		qint32 descriptor = clientSocket->socketDescriptor();
 		qDebug() << descriptor << " connected";
 		Player* playerObj = new Player(clientSocket);
 		_players.append(playerObj);
@@ -44,6 +44,19 @@ void Server::joinLobby(int descriptor) {
 	Player* player = (Player*)sender();
 	for (auto item : _players) {
 		if (item->status == OWNER_WAITING && item->descriptor == descriptor) {
+			qint32 port = 3026;
+			while (port < 40000) {
+				if (occupiedUdpPorts.contains(port)) {
+					port++;
+				}
+				else {
+					occupiedUdpPorts.append(port);
+					occupiedUdpPorts.append(port + 1);
+					break;
+				}
+			}
+			player->setupUdp(port);
+			item->setupUdp(port + 1);
 			Lobby* lobbyObj = new Lobby();
 			player->setLobby(lobbyObj);
 			item->setLobby(lobbyObj);
