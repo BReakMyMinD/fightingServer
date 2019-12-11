@@ -1,28 +1,16 @@
 #include "player.h"
 
-Player::Player(QHostAddress ip, int port) {
-	_socket = new QUdpSocket(this);
-	_socket->bind(QHostAddress::LocalHost, port);
-	_ip = ip;
-	connect(_socket, &QUdpSocket::readyRead, this, &Player::readData);
-	connect(_socket, &QUdpSocket::disconnected, this, &Player::disconnect);
-	this->descriptor = _socket->socketDescriptor();
-	in.setDevice(_socket);
+Player::Player(QTcpSocket* socket) {
+	cmdSocket = socket;
+	ip.setAddress(socket->peerAddress().toIPv4Address());
+	connect(cmdSocket, &QTcpSocket::readyRead, this, &Player::readData);
+	connect(cmdSocket, &QTcpSocket::disconnected, this, &Player::disconnect);
+	this->descriptor = cmdSocket->socketDescriptor();
+	in.setDevice(cmdSocket);
 	in.setVersion(QDataStream::Qt_5_9);
 }
 
-void Player::setPort(int port) {
-	writeData<int>(NEW_PORT, port);
-	_socket->bind(QHostAddress::LocalHost, port);
-}
-
 void Player::readData() {
-	qDebug() << "new data on port " << _port;
-	while (_socket->hasPendingDatagrams()) {
-		QNetworkDatagram datagram = _socket->receiveDatagram();
-		in << datagram.data();
-	}
-
 	in.startTransaction();
 	qint8 code;
 	in >> code;
@@ -35,7 +23,7 @@ void Player::readData() {
 		in >> name;
 		this->name = name;
 		this->status = OWNER_WAITING;
-		this->writeData<int>(LOBBY_CREATED, 0);
+		this->writeData<qint8>(LOBBY_CREATED, 0);
 		break;
 	}
 	case GET_LOBBY_LIST: {
@@ -47,15 +35,31 @@ void Player::readData() {
 		break;
 	}
 	case JOIN_LOBBY: {
-		int lobbyDescriptor;
+		qint32 lobbyDescriptor;
 		in >> lobbyDescriptor;
 		emit joinLobby(lobbyDescriptor);
 		break;
 	}
-	case KEY_PRESS: {
+	/*case KEY_PRESS: {
 		int key;
 		in >> key;
 		//qDebug() << name << " pressed " << key;
+		switch (key) {
+		
+		}
+
+		break;
+	}*/
+	}
+}
+
+void Player::readKey() {
+	while (gameSocket->hasPendingDatagrams()) {
+		QNetworkDatagram data = gameSocket->receiveDatagram();
+		QDataStream buf(data.data());
+		qint16 key;
+		buf >> key;
+		qDebug() << key;
 		switch (key) {
 		case(Qt::Key_A): {
 			getCharacter()->moveLeft();
@@ -70,9 +74,6 @@ void Player::readData() {
 			break;
 		}
 		}
-
-		break;
-	}
 	}
 }
 
@@ -81,16 +82,29 @@ void Player::writeData(qint8 code, T data) {
 	QByteArray block;
 	QDataStream out(&block, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
-	out << code << data;
-	_socket->write(block);
+	if (code == GAME_UPDATE) {
+		out << data;
+		gameSocket->writeDatagram(block, ip, 3025);//3025 - стандартный входной порт клиента
+	}
+	else {
+		out << code << data;
+		cmdSocket->write(block);
+	}
 }
 
 void Player::lobbyListGot(QStringList& list) {
 	writeData<QStringList>(LOBBY_LIST_GOT, list);
 }
 
-void Player::lobbyJoined() {
+/*void Player::lobbyJoined() {
 	writeData<int>(LOBBY_JOINED, 0);
+}*/
+
+void Player::setupUdp(qint32 port) {
+	gameSocket = new QUdpSocket(this);
+	gameSocket->bind(QHostAddress::AnyIPv4, port);
+	connect(gameSocket, &QUdpSocket::readyRead, this, &Player::readKey);
+	udpPort = port;
 }
 
 void Player::setLobby(Lobby *lobbyPtr) {
@@ -101,15 +115,18 @@ void Player::setLobby(Lobby *lobbyPtr) {
 	if (status == GUEST_WAITING) {
 		status = GUEST_PLAYING;
 	}
-	writeData<int>(LOBBY_JOINED, 0);
+	writeData<qint32>(LOBBY_JOINED, udpPort);
 }
 
 Character* Player::getCharacter() {
 	if (status == OWNER_PLAYING) {
 		return lobby->owner;
 	}
-	if (status == GUEST_PLAYING) {
+	else if (status == GUEST_PLAYING) {
 		return lobby->guest;
+	}
+	else {
+		return nullptr;
 	}
 }
 
@@ -117,16 +134,19 @@ Character* Player::getOpponentCharacter() {
 	if (status == OWNER_PLAYING) {
 		return lobby->guest;
 	}
-	if (status == GUEST_PLAYING) {
+	else if (status == GUEST_PLAYING) {
 		return lobby->owner;
+	}
+	else {
+		return nullptr;
 	}
 }
 
 void Player::sendGameState() {
-	QPair<Character*, Character*> gameData;
-	gameData.first = getCharacter();
-	gameData.second = getOpponentCharacter();
-	writeData<QPair<Character*, Character*>>(GAME_UPDATE, gameData);
+	QPair<Character::charData, Character::charData> gameData;
+	gameData.first = getCharacter()->data;
+	gameData.second = getOpponentCharacter()->data;
+	writeData<QPair<Character::charData, Character::charData>>(GAME_UPDATE, gameData);
 }
 
 void Player::disconnect() {

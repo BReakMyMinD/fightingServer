@@ -1,9 +1,9 @@
 #include <QObject>
+#include <QHostAddress>
+#include <QUdpSocket>
+#include <QNetworkDatagram>
 #include "lobby.h"
 #include "types.h"
-#include <QHostAddress>
-#include <QNetworkDatagram>
-#include <QUdpSocket>
 
 enum Status {
 	NO_INFO,
@@ -16,39 +16,40 @@ enum Status {
 class Player : public QObject {
 	Q_OBJECT
 public:
-	Player(QHostAddress ip, int port);
+	Player(QTcpSocket* socket);
 
 	Lobby* lobby = nullptr;
 	QString name;
 	Status status = NO_INFO;
 	void setLobby(Lobby* lobby);
-	void setPort(int port);
+	void setupUdp(qint32 port);
 	Character* getCharacter();
 	Character* getOpponentCharacter();
 
 	int descriptor;
 
 	void lobbyListGot(QStringList& list);
-	void lobbyJoined();
+	//void lobbyJoined();
 
 public slots:
 	void sendGameState();
 
 signals:
 	void getLobbyList();
-	void joinLobby(int descriptor);
+	void joinLobby(qint32 descriptor);
 	void leave();
 	
 private slots:
 	void readData();
+	void readKey();
 	void disconnect();
 private:
 	template<class T>
 	void writeData(qint8 code, T data);
 
-	QUdpSocket* _socket;
+	QTcpSocket* cmdSocket; //команды пользователя в меню передаются по tcp
 	QDataStream in;
-	QHostAddress _ip;
-	int _port;
-
+	QHostAddress ip;
+	qint32 udpPort;
+	QUdpSocket* gameSocket; //данные игрового процесса передаются по udp
 };

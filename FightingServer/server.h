@@ -1,9 +1,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QUdpSocket>
-#include <QNetworkDatagram>
 #include <QDataStream>
-#include <QMap>
+#include <QHash>
 #include <QVector>
 #include <QStringList>
 #include <QObject>
@@ -28,8 +26,8 @@ private slots:
 	
 
 private:
-	QUdpSocket *_socket;
-	//QTcpServer* _tcpServer;
-	QMap<int, Player*> _players;
-	//QVector<Player*> _players;
+	
+	QTcpServer* _tcpServer;
+	QVector<Player*> _players;
+	QList<int> occupiedUdpPorts;
 };
