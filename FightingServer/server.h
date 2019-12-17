@@ -22,7 +22,7 @@ public slots:
 
 private slots:
 	void incomingConnection();
-	void socketDisconnected();
+	void deletePlayer();
 	
 
 private:

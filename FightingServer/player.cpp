@@ -40,16 +40,6 @@ void Player::readData() {
 		emit joinLobby(lobbyDescriptor);
 		break;
 	}
-	/*case KEY_PRESS: {
-		int key;
-		in >> key;
-		//qDebug() << name << " pressed " << key;
-		switch (key) {
-		
-		}
-
-		break;
-	}*/
 	}
 }
 
@@ -57,20 +47,26 @@ void Player::readKey() {
 	while (gameSocket->hasPendingDatagrams()) {
 		QNetworkDatagram data = gameSocket->receiveDatagram();
 		QDataStream buf(data.data());
+		Character* playerChar = getCharacter();
+		Character* oppChar = getOpponentCharacter();
 		qint16 key;
 		buf >> key;
-		qDebug() << key;
 		switch (key) {
 		case(Qt::Key_A): {
-			getCharacter()->moveLeft();
+			//if (!(|| playerChar->data.x - 10 < 0)) {
+				playerChar->moveLeft();
+			//}
 			break;
 		}
 		case(Qt::Key_D): {
-			getCharacter()->moveRight();
+			//if (!(playerChar->data.x + 10 + playerChar->data.width >= oppChar->data.x 
+				//|| playerChar->data.x + 10 + playerChar->data.width > 800)) {
+				playerChar->moveRight();
+			//}
 			break;
 		}
 		case(Qt::Key_W): {
-			getCharacter()->jump();
+			//getCharacter()->jump();
 			break;
 		}
 		}
@@ -150,5 +146,20 @@ void Player::sendGameState() {
 }
 
 void Player::disconnect() {
-	emit leave();
+	if (lobby != nullptr) {
+		delete lobby;
+	}
+	emit gameFinished(QString(name + " quit the game"));
+	emit destroy();
 }
+
+void Player::finishGame(const QString& msg) {
+	writeData<QString>(GAME_OVER, msg);
+	qDebug() << msg << " written";	
+	emit destroy();
+}
+
+Player::~Player() {
+	qDebug() << name << " destroyed";
+}
+

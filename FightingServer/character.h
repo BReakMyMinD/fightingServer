@@ -14,7 +14,7 @@ public:
 	//void interact(Character& opponentCharacter);
 	struct charData {
 		qint16 x, y;
-		qint8 hp;
+		qint8 hp, width, height;
 	} data;
 	
 	friend QDataStream& operator << (QDataStream& stream, const charData& item) {

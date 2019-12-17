@@ -1,5 +1,6 @@
 #include <QObject>
 #include <QHostAddress>
+#include <QTcpSocket>
 #include <QUdpSocket>
 #include <QNetworkDatagram>
 #include "lobby.h"
@@ -17,6 +18,7 @@ class Player : public QObject {
 	Q_OBJECT
 public:
 	Player(QTcpSocket* socket);
+	~Player();
 
 	Lobby* lobby = nullptr;
 	QString name;
@@ -26,18 +28,21 @@ public:
 	Character* getCharacter();
 	Character* getOpponentCharacter();
 
-	int descriptor;
+	qint32 descriptor;
+	qint32 udpPort;
 
 	void lobbyListGot(QStringList& list);
 	//void lobbyJoined();
 
 public slots:
 	void sendGameState();
+	void finishGame(const QString& msg);
 
 signals:
 	void getLobbyList();
 	void joinLobby(qint32 descriptor);
-	void leave();
+	void gameFinished(QString& msg);
+	void destroy();
 	
 private slots:
 	void readData();
@@ -50,6 +55,5 @@ private:
 	QTcpSocket* cmdSocket; //команды пользователя в меню передаются по tcp
 	QDataStream in;
 	QHostAddress ip;
-	qint32 udpPort;
 	QUdpSocket* gameSocket; //данные игрового процесса передаются по udp
 };

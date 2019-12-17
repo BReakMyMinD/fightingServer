@@ -1,13 +1,16 @@
 #include "character.h"
+#include <QDebug>
 
 Character::Character(bool isLeftPosition) {
 	data.hp = 100;
-	data.y = 0;
+	data.y = 300;
+	data.width = 56;
+	data.height = 120;
 	if (isLeftPosition) {
-		data.x = 0;
+		data.x = 250;
 	}
 	else {
-		data.x = 300;
+		data.x = 650;
 	}
 };
 

@@ -16,6 +16,12 @@ void Lobby::timerUpdate() {
 	emit gameUpdated();
 }
 
+Lobby::~Lobby() {
+	_gameTimer->stop();
+	_gameTimer->deleteLater();
+	owner->deleteLater();
+	guest->deleteLater();
+}
 
 
 
