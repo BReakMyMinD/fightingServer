@@ -3,9 +3,10 @@
 
 Character::Character(bool isLeftPosition) {
 	data.hp = 100;
-	data.y = 300;
+	data.y = 480;
 	data.width = 56;
 	data.height = 120;
+	vy = 0;
 	if (isLeftPosition) {
 		data.x = 250;
 	}
@@ -23,5 +24,10 @@ void Character::moveRight() {
 }
 
 void Character::jump() {
-	data.y -= 10;
+	if (vy == 0) {
+		vy = 20;
+	}
+	else {
+		return;
+	}
 }

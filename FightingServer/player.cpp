@@ -66,7 +66,7 @@ void Player::readKey() {
 			break;
 		}
 		case(Qt::Key_W): {
-			//getCharacter()->jump();
+				playerChar->jump();
 			break;
 		}
 		}

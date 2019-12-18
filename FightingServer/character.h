@@ -16,6 +16,7 @@ public:
 		qint16 x, y;
 		qint8 hp, width, height;
 	} data;
+	qint16 vy;
 	
 	friend QDataStream& operator << (QDataStream& stream, const charData& item) {
 		stream << item.x << item.y << item.hp;
@@ -29,7 +30,7 @@ public slots:
 	void jump();
 
 private:
-	
+	 //вертикальное ускорение
 	/*qint8 x,
 		vx,//гориз. ускорение
 		y,
