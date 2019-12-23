@@ -23,8 +23,6 @@ signals:
 	
 private:
 	QTimer* _gameTimer;
-	
-	
 };
 
 

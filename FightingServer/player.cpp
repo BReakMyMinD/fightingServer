@@ -50,24 +50,42 @@ void Player::readKey() {
 		Character* playerChar = getCharacter();
 		Character* oppChar = getOpponentCharacter();
 		qint16 key;
-		buf >> key;
-		switch (key) {
-		case(Qt::Key_A): {
-			//if (!(|| playerChar->data.x - 10 < 0)) {
-				playerChar->moveLeft();
-			//}
-			break;
-		}
-		case(Qt::Key_D): {
-			//if (!(playerChar->data.x + 10 + playerChar->data.width >= oppChar->data.x 
-				//|| playerChar->data.x + 10 + playerChar->data.width > 800)) {
-				playerChar->moveRight();
-			//}
-			break;
-		}
-		case(Qt::Key_W): {
+		qint8 code;
+		buf >> code >> key;
+		if (code == KEY_PRESS) {
+			switch (key) {
+			case(Qt::Key_A): {
+				playerChar->data.vx = -15;
+				break;
+			}
+			case(Qt::Key_D): {
+				playerChar->data.vx = 15;
+				break;
+			}
+			case(Qt::Key_W): {
 				playerChar->jump();
-			break;
+				break;
+			}
+			case(Qt::Key_Space): {
+				playerChar->hit();
+				break;
+			}
+			}
+		}
+		else {
+			switch (key) {
+			case(Qt::Key_A): {
+				if (playerChar->data.vx != 15) {
+					playerChar->data.vx = 0;
+				}
+				break;
+			}
+			case(Qt::Key_D): {
+				if (playerChar->data.vx != -15) {
+					playerChar->data.vx = 0;
+				}
+				break;
+			}
 		}
 		}
 	}
@@ -92,10 +110,6 @@ void Player::lobbyListGot(QStringList& list) {
 	writeData<QStringList>(LOBBY_LIST_GOT, list);
 }
 
-/*void Player::lobbyJoined() {
-	writeData<int>(LOBBY_JOINED, 0);
-}*/
-
 void Player::setupUdp(qint32 port) {
 	gameSocket = new QUdpSocket(this);
 	gameSocket->bind(QHostAddress::AnyIPv4, port);
@@ -112,6 +126,10 @@ void Player::setLobby(Lobby *lobbyPtr) {
 		status = GUEST_PLAYING;
 	}
 	writeData<qint32>(LOBBY_JOINED, udpPort);
+}
+
+void Player::playerWin() {	
+	emit gameFinished(QString(name + " won!"));
 }
 
 Character* Player::getCharacter() {
@@ -146,20 +164,13 @@ void Player::sendGameState() {
 }
 
 void Player::disconnect() {
-	if (lobby != nullptr) {
-		delete lobby;
-	}
 	emit gameFinished(QString(name + " quit the game"));
-	emit destroy();
 }
 
 void Player::finishGame(const QString& msg) {
+	if (lobby != NULL) {
+		lobby->deleteLater();
+	}
 	writeData<QString>(GAME_OVER, msg);
-	qDebug() << msg << " written";	
 	emit destroy();
 }
-
-Player::~Player() {
-	qDebug() << name << " destroyed";
-}
-

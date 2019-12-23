@@ -1,9 +1,6 @@
 #include "server.h"
 
 
-
-
-
 void Server::startServer(int port) {
 	_tcpServer = new QTcpServer(this);
 	if (!_tcpServer->listen(QHostAddress::Any, port)) {
@@ -64,7 +61,12 @@ void Server::joinLobby(int descriptor) {
 			connect(lobbyObj, &Lobby::gameUpdated, item, &Player::sendGameState);
 			
 			connect(player, &Player::gameFinished, item, &Player::finishGame);
+			connect(player, &Player::gameFinished, player, &Player::finishGame);
 			connect(item, &Player::gameFinished, player, &Player::finishGame);
+			connect(item, &Player::gameFinished, item, &Player::finishGame);;
+
+			connect(lobbyObj->owner, &Character::characterKilled, player, &Player::playerWin);
+			connect(lobbyObj->guest, &Character::characterKilled, item, &Player::playerWin);
 		}
 	}
 }

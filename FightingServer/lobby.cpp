@@ -12,30 +12,20 @@ Lobby::Lobby() {
 void Lobby::timerUpdate() {
 	//обработка механики
 	//реализовать всю механику как методы Character
-	if (owner->vy != 0) {
-		owner->data.y -= owner->vy;
-		if (owner->vy - 1 == 0) {
-			owner->vy = -21;
-		}
-		if (owner->vy > 0) {
-			owner->vy -= 1;
-		}
-		else if (owner->vy < 0) {
-			owner->vy += 1;
-		}
-	}
-	if (guest->vy != 0) {
-		guest->data.y -= guest->vy;
-		if (guest->vy - 1 == 0) {
-			guest->vy = -21;
-		}
-		if (guest->vy > 0) {
-			guest->vy -= 1;
-		}
-		else if (guest->vy < 0) {
-			guest->vy += 1;
-		}
-	}
+	
+	
+	if (owner->isCollision(guest) && owner->data.hit == 1) {
+		guest->data.hp -= 5;
+		guest->isAlive();
+	};
+	if (guest->isCollision(owner) && guest->data.hit == 1) {
+		owner->data.hp -= 5;
+		owner->isAlive();
+	};
+	
+	owner->move();
+	guest->move();
+	
 
 	emit gameUpdated();
 }

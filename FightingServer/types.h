@@ -9,6 +9,7 @@ const qint8 JOIN_LOBBY = 12;
 const qint8 LOBBY_JOINED = 22;
 const qint8 GAME_UPDATE = 23;
 const qint8 KEY_PRESS = 13;
+const qint8 KEY_RELEASE = 14;
 const qint8 GAME_OVER = 24;
 
 //error codes

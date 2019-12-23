@@ -7,7 +7,6 @@
 #include <QObject>
 #include <QString>
 #include <QPair>
-#include <QTimer>
 #include "player.h"
 #include "character.h"
 
@@ -23,11 +22,9 @@ public slots:
 private slots:
 	void incomingConnection();
 	void deletePlayer();
-	
 
 private:
-	
 	QTcpServer* _tcpServer;
 	QVector<Player*> _players;
-	QList<int> occupiedUdpPorts;
+	QList<qint32> occupiedUdpPorts;
 };
